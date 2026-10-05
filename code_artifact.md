@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>لف العجلة واكسب</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;800&display=swap">
+<style>
+:root {
+  --bg: #0F3D3E;
+  --ink: #FFFFFF;
+  --accent: #F2C14E;
+  --coral: #E4572E;
+  --mint: #2EC4B6;
+  --muted: #A9D1CC;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0F3D3E; }
+}
+:root[data-theme="dark"] { --bg: #0F3D3E; }
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Cairo", Tahoma, Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px 32px;
+}
+h1 {
+  font-size: clamp(28px, 8vw, 40px);
+  font-weight: 800;
+  margin: 8px 0 4px;
+  text-align: center;
+}
+p.sub {
+  margin: 0 0 18px;
+  color: var(--muted);
+  text-align: center;
+  font-size: 17px;
+}
+.stage {
+  position: relative;
+  width: min(88vw, 380px);
+  aspect-ratio: 1;
+}
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.pointer {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  border-top: 30px solid var(--accent);
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.4));
+  z-index: 2;
+}
+button {
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 800;
+  border: 0;
+  border-radius: 14px;
+  padding: 14px 44px;
+  margin-top: 24px;
+  background: var(--accent);
+  color: #1b2b2b;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+.result {
+  display: none;
+  margin-top: 22px;
+  width: min(92vw, 380px);
+  background: #fff;
+  color: #16302f;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+}
+.result.show { display: block; }
+.result h2 { margin: 0 0 6px; font-size: 26px; }
+.prize {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--coral);
+  margin: 4px 0;
+}
+.code {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 8px 16px;
+  border: 2px dashed #16302f;
+  border-radius: 10px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  direction: ltr;
+}
+.note { margin: 12px 0 0; font-size: 15px; color: #4b6361; }
+</style>
+</head>
+<body>
+
+<h1>لف العجلة واكسب</h1>
+<p class="sub">خصومات ومشروبات مجانية في انتظارك</p>
+
+<div class="stage">
+  <div class="pointer"></div>
+  <canvas id="c" width="760" height="760" aria-label="عجلة الحظ"></canvas>
+</div>
+
+<button id="spin">لف الآن</button>
+
+<div class="result" id="res" role="status" aria-live="polite">
+  <h2 id="rt"></h2>
+  <div class="prize" id="rp"></div>
+  <div class="code" id="rc"></div>
+  <p class="note" id="rn"></p>
+</div>
+
+<script>
+var PRIZES = [
+ {label: "خصم 10%", w: 20, win: true},
+ {label: "حظ أوفر", w: 25, win: false},
+ {label: "مشروب مجاني", w: 5, win: true},
+ {label: "خصم 5%", w: 25, win: true},
+ {label: "خصم 20%", w: 5, win: true},
+ {label: "حظ أوفر", w: 25, win: false},
+ {label: "خصم 15%", w: 10, win: true},
+ {label: "مشروب مجاني", w: 5, win: true}
+];
+
+var COLORS = ["#F2C14E", "#FFFFFF", "#2EC4B6", "#E4572E"];
+var cv = document.getElementById("c"), ctx = cv.getContext("2d"), N = PRIZES.length, ARC = 2 * Math.PI / N, rot = 0, busy = false;
+var KEY = "spin_wheel_played";
+
+function today() { return new Date().toISOString().slice(0, 10); }
+function played() { try { return localStorage.getItem(KEY) === today(); } catch(e) { return false; } }
+function mark() { try { localStorage.setItem(KEY, today()); } catch(e) {} }
+
+function draw() {
+ var s = cv.width, r = s / 2;
+ ctx.clearRect(0, 0, s, s);
+ ctx.save();
+ ctx.translate(r, r);
+ ctx.rotate(rot);
+ 
+ for (var i = 0; i < N; i++) {
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.arc(0, 0, r - 8, i * ARC, (i + 1) * ARC);
+  ctx.closePath();
+  ctx.fillStyle = COLORS[i % COLORS.length];
+  ctx.fill();
+  
+  ctx.save();
+  ctx.rotate(i * ARC + ARC / 2);
+  ctx.textAlign = "right";
+  ctx.fillStyle = (COLORS[i % COLORS.length] === "#E4572E" || COLORS[i % COLORS.length] === "#2EC4B6") ? "#fff" : "#16302f";
+  ctx.font = "800 40px Cairo, Tahoma, Arial, sans-serif";
+  ctx.textBaseline = "middle";
+  ctx.fillText(PRIZES[i].label, r - 40, 0);
+  ctx.restore();
+ }
+ 
+ ctx.beginPath();
+ ctx.arc(0, 0, 34, 0, 7);
+ ctx.fillStyle = "#0F3D3E";
+ ctx.fill();
+ ctx.lineWidth = 6;
+ ctx.strokeStyle = "#F2C14E";
+ ctx.stroke();
+ ctx.restore();
+}
+
+function pick() {
+ var t = 0, i;
+ for (i = 0; i < N; i++) t += PRIZES[i].w;
+ var x = Math.random() * t;
+ for (i = 0; i < N; i++) {
+  x -= PRIZES[i].w;
+  if (x < 0) return i;
+ }
+ return 0;
+}
+
+function code() {
+ var c = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", o = "";
+ for (var i = 0; i < 5; i++) o += c[Math.floor(Math.random() * c.length)];
+ return o;
+}
+
+function show(i, c) {
+ var p = PRIZES[i], res = document.getElementById("res");
+ document.getElementById("rt").textContent = p.win ? "مبروك!" : "قربت!";
+ document.getElementById("rp").textContent = p.win ? p.label : "جرّب تاني بكرة";
+ document.getElementById("rc").style.display = p.win ? "inline-block" : "none";
+ document.getElementById("rc").textContent = c || "";
+ document.getElementById("rn").textContent = p.win ? "وري الشاشة دي للكاشير قبل ما تقفلها." : "";
+ res.classList.add("show");
+}
+
+function spin() {
+ if (busy) return;
+ if (played()) {
+  document.getElementById("rt").textContent = "لفيت النهارده";
+  document.getElementById("rp").textContent = "ارجع بكرة";
+  document.getElementById("rc").style.display = "none";
+  document.getElementById("rn").textContent = "";
+  document.getElementById("res").classList.add("show");
+  return;
+ }
+ busy = true;
+ document.getElementById("spin").disabled = true;
+ document.getElementById("res").classList.remove("show");
+ 
+ var i = pick(), extra = (5 + Math.floor(Math.random() * 3)) * 2 * Math.PI;
+ var target = -Math.PI / 2 - (i * ARC + ARC / 2);
+ var start = rot, end = target - Math.ceil((target - start) / (2 * Math.PI)) * 2 * Math.PI + extra;
+ 
+ while (end < start + 4 * Math.PI) end += 2 * Math.PI;
+ var dur = 4500, t0 = null;
+ 
+ function step(t) {
+  if (!t0) t0 = t;
+  var k = Math.min((t - t0) / dur, 1), e = 1 - Math.pow(1 - k, 4);
+  rot = start + (end - start) * e;
+  draw();
+  if (k < 1) {
+   requestAnimationFrame(step);
+  } else {
+   mark();
+   busy = false;
+   show(i, PRIZES[i].win ? code() : "");
+  }
+ }
+ requestAnimationFrame(step);
+}
+
+document.getElementById("spin").addEventListener("click", spin);
+draw();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+</script>
+
+</body>
+</html>
