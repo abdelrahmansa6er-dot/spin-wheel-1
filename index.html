@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>لف العجلة واكسب</title>
+<title>Spin the Wheel & Win</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;800&display=swap">
 <style>
 :root{--bg:#0F3D3E;--ink:#FFFFFF;--accent:#F2C14E;--coral:#E4572E;--mint:#2EC4B6;--muted:#A9D1CC;
@@ -30,10 +30,10 @@ button:focus-visible{outline:3px solid #fff;outline-offset:3px}
 </style>
 </head>
 <body>
-<h1>لف العجلة واكسب</h1>
+<h1>Spin the Wheel & Win</h1>
 <p class="sub">خصومات ومشروبات مجانية في انتظارك</p>
 <div class="stage"><div class="pointer"></div><canvas id="c" width="760" height="760" aria-label="عجلة الحظ"></canvas></div>
-<button id="spin">لف الآن</button>
+<button id="spin" >Spin Now</button>
 <div class="result" id="res" role="status" aria-live="polite">
   <h2 id="rt"></h2>
   <div class="prize" id="rp"></div>
@@ -73,16 +73,16 @@ function pick(){var t=0,i;for(i=0;i<N;i++)t+=PRIZES[i].w;var x=Math.random()*t;f
 function code(){var c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",o="";for(var i=0;i<5;i++)o+=c[Math.floor(Math.random()*c.length)];return o}
 function show(i,c){
  var p=PRIZES[i],res=document.getElementById("res");
- document.getElementById("rt").textContent=p.win?"مبروك!":"قربت!";
- document.getElementById("rp").textContent=p.win?p.label:"جرّب تاني بكرة";
+ document.getElementById("rt").textContent=p.win?"Congratulations!":"Almost!";
+ document.getElementById("rp").textContent=p.win?p.label:"Try again tomorrow";
  document.getElementById("rc").style.display=p.win?"inline-block":"none";
  document.getElementById("rc").textContent=c||"";
- document.getElementById("rn").textContent=p.win?"وري الشاشة دي للكاشير قبل ما تقفلها.":"";
+ document.getElementById("rn").textContent=p.win?"Show this screen to the cashier before closing it.":"";
  res.classList.add("show");
 }
 function spin(){
  if(busy)return;
- if(played()){document.getElementById("rt").textContent="لفيت النهارده";document.getElementById("rp").textContent="ارجع بكرة";document.getElementById("rc").style.display="none";document.getElementById("rn").textContent="";document.getElementById("res").classList.add("show");return}
+ if(played()){document.getElementById("rt").textContent="You already spun today";document.getElementById("rp").textContent="Come back tomorrow";document.getElementById("rc").style.display="none";document.getElementById("rn").textContent="";document.getElementById("res").classList.add("show");return}
  busy=true;document.getElementById("spin").disabled=true;document.getElementById("res").classList.remove("show");
  var i=pick(),extra=(5+Math.floor(Math.random()*3))*2*Math.PI;
  // المؤشر فوق (زاوية -90°)، نوقف منتصف الشريحة i عنده
