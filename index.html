@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Spin the Wheel & Win</title>
+<title>Spin & Win</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;800&display=swap">
 <style>
 :root{--bg:#0F3D3E;--ink:#FFFFFF;--accent:#F2C14E;--coral:#E4572E;--mint:#2EC4B6;--muted:#A9D1CC;
@@ -30,10 +30,10 @@ button:focus-visible{outline:3px solid #fff;outline-offset:3px}
 </style>
 </head>
 <body>
-<h1>Spin the Wheel & Win</h1>
-<p class="sub">خصومات ومشروبات مجانية في انتظارك</p>
-<div class="stage"><div class="pointer"></div><canvas id="c" width="760" height="760" aria-label="عجلة الحظ"></canvas></div>
-<button id="spin" >Spin Now</button>
+<h1>Spin & Win</h1>
+<p class="sub">Spin the wheel for a chance to win exclusive rewards!</p>
+<div class="stage"><div class="pointer"></div><canvas id="c" width="760" height="760" aria-label="Prize wheel"></canvas></div>
+<button id="spin" >SPIN NOW</button>
 <div class="result" id="res" role="status" aria-live="polite">
   <h2 id="rt"></h2>
   <div class="prize" id="rp"></div>
@@ -43,14 +43,14 @@ button:focus-visible{outline:3px solid #fff;outline-offset:3px}
 <script>
 // عدّل الجوايز من هنا: label = النص، w = احتمال الفوز (أرقام أكبر = فرصة أكبر)، win = true لو جائزة
 var PRIZES=[
- {label:"خصم 10%",w:20,win:true},
- {label:"حظ أوفر",w:25,win:false},
- {label:"مشروب مجاني",w:5,win:true},
- {label:"خصم 5%",w:25,win:true},
- {label:"خصم 20%",w:5,win:true},
- {label:"حظ أوفر",w:25,win:false},
- {label:"خصم 15%",w:10,win:true},
- {label:"مشروب مجاني",w:5,win:true}
+ {label:"10% OFF",w:20,win:true},
+ {label:"Luck Next Time",w:25,win:false},
+ {label:"FREE DRINK",w:5,win:true},
+ {label:"5% OFF",w:25,win:true},
+ {label:"20% OFF",w:5,win:true},
+ {label:"Luck Next Time",w:25,win:false},
+ {label:"15% OFF",w:10,win:true},
+ {label:"FREE DRINK",w:5,win:true}
 ];
 var COLORS=["#F2C14E","#FFFFFF","#2EC4B6","#E4572E"];
 var cv=document.getElementById("c"),ctx=cv.getContext("2d"),N=PRIZES.length,ARC=2*Math.PI/N,rot=0,busy=false;
@@ -73,16 +73,16 @@ function pick(){var t=0,i;for(i=0;i<N;i++)t+=PRIZES[i].w;var x=Math.random()*t;f
 function code(){var c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",o="";for(var i=0;i<5;i++)o+=c[Math.floor(Math.random()*c.length)];return o}
 function show(i,c){
  var p=PRIZES[i],res=document.getElementById("res");
- document.getElementById("rt").textContent=p.win?"Congratulations!":"Almost!";
- document.getElementById("rp").textContent=p.win?p.label:"Try again tomorrow";
+ document.getElementById("rt").textContent=p.win?"Congratulations!":"Luck Next Time!";
+ document.getElementById("rp").textContent=p.win?p.label:"Try Again Tomorrow";
  document.getElementById("rc").style.display=p.win?"inline-block":"none";
  document.getElementById("rc").textContent=c||"";
- document.getElementById("rn").textContent=p.win?"Show this screen to the cashier before closing it.":"";
+ document.getElementById("rn").textContent=p.win?"Show this screen to our cashier to redeem your prize.":"";
  res.classList.add("show");
 }
 function spin(){
  if(busy)return;
- if(played()){document.getElementById("rt").textContent="You already spun today";document.getElementById("rp").textContent="Come back tomorrow";document.getElementById("rc").style.display="none";document.getElementById("rn").textContent="";document.getElementById("res").classList.add("show");return}
+ if(played()){document.getElementById("rt").textContent="You've Already Spun Today";document.getElementById("rp").textContent="Come Back Tomorrow";document.getElementById("rc").style.display="none";document.getElementById("rn").textContent="";document.getElementById("res").classList.add("show");return}
  busy=true;document.getElementById("spin").disabled=true;document.getElementById("res").classList.remove("show");
  var i=pick(),extra=(5+Math.floor(Math.random()*3))*2*Math.PI;
  // المؤشر فوق (زاوية -90°)، نوقف منتصف الشريحة i عنده
